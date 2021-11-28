@@ -1,10 +1,31 @@
+import type { LoaderFunction } from "remix";
+import { useLoaderData, Link } from "remix";
+import type { Joke } from "@prisma/client";
+import { db } from "~/utils/db.server";
+
+type LoaderData = { randomJoke: Joke };
+
+export let loader: LoaderFunction = async () => {
+  let count = await db.joke.count();
+  let randomRowNumber = Math.floor(Math.random() * count);
+  let [randomJoke] = await db.joke.findMany({
+    take: 1,
+    skip: randomRowNumber
+  });
+  let data: LoaderData = { randomJoke };
+  return data;
+};
+
 export default function JokesIndexRoute() {
+  let data = useLoaderData<LoaderData>();
+
   return (
     <div>
-      <p>これがランダムなジョークです:</p>
-      <p>
-       なぜフリスビーが大きくなっているのだろうと思ったら、それが私にぶつかった。
-      </p>
+      <p>これはランダムで表示されるジョークです:</p>
+      <p>{data.randomJoke.content}</p>
+      <Link to={data.randomJoke.id}>
+        「{data.randomJoke.name}」 パーマリンク
+      </Link>
     </div>
   );
 }
