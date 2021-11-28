@@ -5,7 +5,7 @@ import {
   useSearchParams
 } from "remix";
 import { db } from "~/utils/db.server";
-import { login, createUserSession } from "~/utils/session.server";
+import { login, createUserSession, register } from "~/utils/session.server";
 import stylesUrl from "../styles/login.css";
 
 export let links: LinksFunction = () => {
@@ -84,8 +84,14 @@ export let action: ActionFunction = async ({
         };
       }
       // create the user
-      // create their session and redirect to /jokes
-      return { fields, formError: "まだ実装されていません" };
+      const user = await register({ username, password });
+      if (!user) {
+        return {
+          fields,
+          formError: `新しいユーザーを作成しようとして問題が発生しました。`
+        };
+      }
+      return createUserSession(user.id, redirectTo);
     }
     default: {
       return { fields, formError: `ログインタイプが無効です` };
