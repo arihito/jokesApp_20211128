@@ -1,10 +1,19 @@
 import { PrismaClient } from "@prisma/client";
-let db = new PrismaClient();
+let prisma = new PrismaClient();
 
 async function seed() {
+  let kody = await prisma.user.create({
+    data: {
+      username: "kody",
+      // this is a hashed version of "twixrox"
+      passwordHash:
+        "$2b$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu/1u"
+    }
+  });
   await Promise.all(
     getJokes().map(joke => {
-      return db.joke.create({ data: joke });
+      let data = { jokesterId: kody.id, ...joke };
+      return prisma.joke.create({ data });
     })
   );
 }
@@ -21,19 +30,19 @@ function getJokes() {
     },
     {
       name: "フリスビー",
-      content: "フリスビーが大きくなっているのはなぜだろうと思っていたのですが、それが私を襲いました。」"
+      content: "フリスビーが大きくなっているのはなぜだろうと思っていたのですが、それが私を襲いました。"
     },
     {
       name: "木",
-      content: "晴れた日に木が不審に見えるのはなぜですか？ ダンノ、彼らはちょっと日陰だ。」"
+      content: "晴れた日に木が不審に見えるのはなぜですか？ ダンノ、彼らはちょっと日陰だ。"
     },
     {
       name: "スケルトン",
-      content: "なぜスケルトンはジェットコースターに乗らないのですか？ 彼らはそれのための胃を持っていません。」"
+      content: "なぜスケルトンはジェットコースターに乗らないのですか？ 彼らはそれのための胃を持っていません。"
     },
     {
       name: "カバ",
-      content: "木に隠れているカバを見つけてみませんか？ 彼らは本当にそれが得意です。」"
+      content: "木に隠れているカバを見つけてみませんか？ 彼らは本当にそれが得意です。"
     },
     {
       name: "ディナー",
